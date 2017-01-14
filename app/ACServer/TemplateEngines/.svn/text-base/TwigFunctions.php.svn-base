@@ -1,0 +1,27 @@
+<?php namespace StarTribune\TemplateEngines;
+
+use Twig_Extension;
+use Twig_SimpleFunction;
+
+class TwigFunctions extends Twig_Extension
+{
+   public function getFunctions()
+   {
+      return array(
+         new Twig_SimpleFunction('getHeader', function($headerId, $sosp = '')
+         {
+            readfile('http://www.startribune.com/partner/header/282483121/');
+         }),
+         new Twig_SimpleFunction('getFooter', function($footerId, $sosp = '')
+         {
+            readfile('http://www.startribune.com/partner/footer/282483121/');
+         })
+      );
+   }
+
+   public function getName()
+   {
+      //
+   }
+}
+

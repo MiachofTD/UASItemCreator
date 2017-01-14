@@ -1,0 +1,6 @@
+{{ getHeader(282483121, '/entertainment/movies') }}
+<style type="text/css">@import url("css/movie-guide.css");</style>
+
+{% include 'search-bar.twig' %}
+
+{{ getFooter(282483121, '/entertainment/movies') }}

@@ -1,0 +1,101 @@
+<?php namespace StarTribune\Models;
+
+use StarTribune\Controllers\SearchController;
+use Exception;
+
+class Showtime {
+	protected $showtime_id;
+	protected $theater_id;
+	protected $movie_id;
+
+	protected $movie_title;
+	protected $mpaa_rating;
+	protected $mpaa_rating_advisory;
+	protected $running_time;
+	protected $thumbnail;
+	protected $thumbnail_large;
+	protected $show_date; //Zulu time
+	protected $show_times_str;
+
+	protected $theater_name;
+	protected $theater_address;
+	protected $theater_city;
+	protected $theater_zip;
+	protected $strib_area;
+	protected $geocode;
+	protected $geocode_0_coordinate; //latitude
+	protected $geocode_1_coordinate; //longitude
+
+	protected $tms_id;
+	protected $text;
+
+	/**
+	 * Populate the model
+	 * 
+	 * @param object $showtime Data about the movie
+	 */
+	public function __construct($showtime) {
+		$this->populateModel($showtime);
+	}
+
+	/**
+	 * Get the value of a data member and return it.
+	 *
+	 * @param string $name of the data member
+	 * @return mixed The value of the data member
+	 */
+	public function getAttribute($name) {
+		if (property_exists('\\StarTribune\\Models\\Showtime', $name)) {
+			return $this->{$name};
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set a data member's value
+	 * @internal Since the data is saved in solr, and this application isn't currently used
+	 *   to actually update that information in any fashion, this function is strictly
+	 *   used to populate the values of the model.
+	 *
+	 * @param string $name The name of the data member receiving the value.
+	 * @param mixed $value The new value of the data member.
+	 */
+	protected function setAttribute($name, $value) {
+		if (property_exists('\\StarTribune\\Models\\Showtime', $name)) {
+			try {
+				$this->{$name} = $value;
+			} catch (Exception $e) {
+				echo "<pre>" . $e->getMessage() . "</pre>";
+			}
+		}
+	}
+
+	protected function populateModel($showtime) {
+		if (is_numeric($showtime)) {
+			$showtimes = new SearchController('showtime');
+			$showtimes->query->setQuery('showtime_id:' . $showtime);
+			$showtimes->query->setRows(1);
+			$results = $showtimes->search();
+
+			if ($results->getNumFound() <= 0) {
+				throw new Exception('Showtime not found.');
+			}
+		} elseif (is_object($showtime)) {
+			$results = array($showtime);
+		} else {
+			throw new Exception('Invalid showtime');
+		}
+
+		foreach ($results as $document) {
+			foreach ($document as $key => $value) {
+				$this->setAttribute($key, $value);
+			}
+			break;
+		}
+	}
+
+	public function getShowtimeData() {
+		return get_object_vars($this);
+	}
+}

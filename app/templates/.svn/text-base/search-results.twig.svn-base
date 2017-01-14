@@ -1,0 +1,37 @@
+{{ getHeader(282483121, '/entertainment/movies') }}
+<style type="text/css">@import url("css/movie-guide.css");</style>
+{% include 'search-bar.twig' %}
+
+<div class="movieGuide searchResults">
+	<h4>You searched for theaters in the {{ zipcode }} ZIP Code</h4>
+	{% include 'search-pagination.twig' with {'class': 'top'} %}
+	<table start="{{ start }}" class="theater-list">
+		{% if search_results is empty %}
+		<tr>
+			<td colspan="3">No theaters found in the ZIP Code you searched.</td>
+		</tr>
+		{% else %}
+		<tr>
+			<th colspan="2">THEATER</th>
+			<th>ADDRESS</th>
+		</tr>
+		{% for theater in search_results %}
+		<tr>
+			<td><a href="details.php?theater={{ theater.theater_id }}">{{ theater.name }}</a></td>
+			<td class="theater-times">
+				<a href="details.php?theater={{ theater.theater_id }}">Show times</a>
+			</td>
+			<td class="theater-address">
+				<a target="_blank" href="https://www.google.com/maps/place/{{ theater.map_address|url_encode }}">
+					{{ theater.address }},<br />{{ theater.city }}, {{ theater.state }} {{ theater.zip }}
+				</a><br />
+					{{ theater.phone }}
+			</td>
+		</tr>
+		{% endfor %}
+		{% endif %}
+	</table>
+	{% include 'search-pagination.twig' with {'class': 'bottom'} %}
+</div>
+
+{{ getFooter(282483121, '/entertainment/movies') }}

@@ -1,0 +1,119 @@
+{{ getHeader(282483121, '/entertainment/movies') }}
+<style type="text/css">@import url("css/movie-guide.css");</style>
+{% include 'search-bar.twig' %}
+{# Dates forced GMT, because that's how they're saved in Solr. If you don't force the timezone, it displays in one of the American timezones, making it one day early #}
+<div class="movieGuide leftCol">
+	{% if movie.thumbnail_large %}
+		<div class="moviePoster"><img src="{{ movie.thumbnail_large }}" alt="{{ movie.title }}"></div>
+	{% else %}
+		<img class="noImage" width="200" height="140" alt="" src="http://stmedia.startribune.com/images/NoMoviePoster.png">
+	{% endif %}
+	<p>
+		<span class="title">Starring: </span>
+		<span class="value">{{ movie.actors|join(', ') }}</span>
+	</p>
+	<p>
+		<span class="title">Director: </span>
+		<span class="value">{{ movie.directors|join(', ') }}</span>
+	</p>
+	<p>
+		<span class="title">Rated: </span>
+		<span class="value">{{ movie.mpaa_rating }} {{ movie.mpaa_rating_advisory }}</span>
+	</p>
+	<p>
+		<span class="title">Length: </span>
+		<span class="value">{{ movie.running_time }} minutes</span>
+	</p>
+	<p>
+		<span class="title">Release Date: </span>
+		<span class="value">{{ movie.release_date|date('m/d/Y', 'GMT') }}</span>
+	</p>
+</div>	
+	
+<div class="movieGuide rightCol movieTimes">
+	<h3>{{ movie.title }}</h3>
+	{% if movie.strib_stars %}
+		<p class="review">
+		{% set starNumValue = movie.strib_stars  %}
+		{% set starNum = 0 + starNumValue %}
+		{% if starNum == 0 %}
+			0 out of four stars
+		{% elseif ( starNum > 0 ) and ( starNum < 1 ) %}
+			&#189; out of four stars
+		{% elseif ( starNum > 1 ) and ( starNum < 2 ) %}
+			<span>&#9733;</span>&#189; out of four stars
+		{% else %}
+			{% for i in 1..starNum %}
+				<span>&#9733;</span>
+				{% if loop.last %}
+					{% if loop.index < starNum %}
+						&#189;
+					{% endif %}
+					 out of 4 stars
+				{% endif %}
+			{% endfor %}
+		{% endif%}
+		{% if movie.strib_review %}&nbsp;&nbsp;<a href="{{ movie.strib_review }}" target="_blank">Read our review &raquo;</a>{% endif %}
+		</p>
+	{% endif %}
+	 <ul class="sharing">
+        <li>
+            <div class="pw-widget pw-counter-horizontal">
+                <a class="pw-button-facebook pw-look-native" rel="nofollow" onclick="var s=s_gi('nmstartribuneactions');s.linkTrackVars='prop46,prop47,';s.prop46='Facebook';s.prop47='$!{shareTitle}';s.tl(true,'e','social media');b=e=new Date; while(e.getTime()-b.getTime()<500){e=new Date;}"></a>
+                <a class="pw-button-twitter pw-look-native"></a>
+           </div>
+        </li>
+    </ul>
+
+	<p>{{ movie.summary }}</p>
+	<h4>Showtimes</h4>
+	<table>
+		{% if showtimes is empty %}
+			<tr><td class="show-bar">No theaters are showing this movie right now.</td></tr>
+		{% else %}
+		{% for day,show_list in showtimes %}
+			{% set dayNum = loop.index %}
+			<tr{% if loop.last %} class="last"{% endif %}><td colspan="2" class="show-bar">{% if loop.first %}Today{% elseif loop.index == 2 %}Tomorrow{% else %}{{ day|date('l, F j, Y', 'GMT') }}{% endif %}<div {% if loop.first %}class="active" {% endif %}id="day{{ dayNum }}" onclick="day{{ dayNum }}"></div></td></tr>
+				{% for showtime in show_list %}
+					<tr class="day day{{ dayNum }}{% if loop.last %} last{% endif %}"><td><a href="?theater={{ showtime.theater_id }}">{{ showtime.theater_name }}</a></td><td>{{ showtime.show_times_str }}</td></tr>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+		{% endif %}
+	</table>
+</div>
+<script type="text/javascript">
+	jQuery(document).ready(function() {
+	{% for day,show_list in showtimes %}
+		{% set dayNum = loop.index %}
+		jQuery( "#day{{ dayNum }}" ).click(function() {
+			jQuery( ".day{{ dayNum }}" ).toggle('slow');
+			jQuery(this).toggleClass( "active" );
+		});
+	{% endfor %}
+	});
+</script>
+
+<script src="http://i.po.st/static/v3/post-widget.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var pwidget_config = {
+        shareQuote: false,
+        copypaste: false,
+        publisherKey: '56d2hkmk6d6lmd6llqb2',
+        defaults: {
+            sharePopups: true,
+            title: "{{ movie.title }}",
+            url: "http://apps.startribune.com/movies/details.php?movie={{ movie.movie_id }}",
+            buttons: [
+            	{ id: 'facebook', look: 'native' },
+            	{ id: 'twitter', look: 'native' }
+            ],
+            services: {
+            	twitter: {
+            		via: "startribune"
+            	}
+            }
+        }
+    };
+</script>
+{{ getFooter(282483121, '/entertainment/movies') }}

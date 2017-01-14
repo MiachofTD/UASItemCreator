@@ -1,0 +1,152 @@
+<?php namespace StarTribune\Controllers;
+
+use StarTribune\Models;
+
+class SearchBoxController {
+	public static function movieDropdownList() {
+		$movie_list = array();
+		$neighborhood_list = array();
+
+		try {
+			$movies = new SearchController('showtimes');
+			$movies->query->addSort('movie_title', 'asc');
+			$movies->query->setRows(1000000);
+			$movies->query->setQuery('show_date:[NOW/DAY TO NOW/DAY+15DAY]');
+			$movies->query->setFields(array('movie_id', 'movie_title'));
+
+			$movie_group = $movies->query->getGrouping();
+			$movie_group->addField('movie_id');
+			$results = $movies->search();
+
+			foreach ($results->getGrouping() as $groupKey => $fieldGroup) {
+				foreach ($fieldGroup as $valueGroup) {
+					foreach ($valueGroup as $document) {
+						$movie = new Models\Movie((object)array('movie_id' => $document->movie_id, 'title' => $document->movie_title), false);
+						$movie_list[trim(strtolower($document->movie_title))] = $movie->getMovieData();
+					}
+				}
+			}
+			ksort($movie_list);
+		} catch (Exception $e) {
+			echo "<pre>";
+			print_r($e->getMessage());
+			echo "</pre>";die;
+		}
+		return $movie_list;
+	}
+
+	public static function theaterDropdownList() {
+		$theater_list = array();
+
+		try {
+			$theaters = new SearchController('theaters');
+			$theaters->query->addSort('name', 'desc');
+			$theaters->query->setRows(1000000);
+			$theaters->query->setFields(array('theater_id', 'name'));
+			$results = $theaters->search();
+
+			foreach ($results as $document) {
+				$theater_id = $document->theater_id;
+				if (!empty($theater_id)) {
+					$theater = new Models\Theater($document, false);
+					$theater_list[trim(strtolower($document->name))] = $theater->getTheaterData();
+				}
+			}
+			ksort($theater_list);
+		} catch (Exception $e) {
+			echo "<pre>";
+			print_r($e->getMessage());
+			echo "</pre>";die;
+		}
+		return $theater_list;
+	}
+
+	public static function recentMoviesList() {
+		return recentMoviesForLastXDays(7);
+	}
+
+	public static function zipcodeLookup($zipcode) {
+		$location = array();
+
+		try {
+			$geolocations = new SearchController('geolocations');
+			$geolocations->query->setFields(array('name', 'centroid'));
+			$geolocations->query->setQuery('name:' . $zipcode);
+			$results = $geolocations->search();
+
+			foreach ($results as $document) {
+				list($location['latitude'], $location['longitude']) = explode(",", $document->centroid);
+				break;
+			}
+		} catch (Exception $e) {
+			echo "<pre>";
+			print_r($e->getMessage());
+			echo "</pre>";die;
+		}
+
+		return $location;
+	}
+
+	public static function theaterSearch($latitude, $longitude, $start = 0) {
+		$theater_list = array();
+		$total_records = 0;
+
+		try {
+			$theaters = new SearchController('theaters');
+			$queryHelper = $theaters->query->getHelper();
+			//$theaters->query->setFields(array('theater_id', 'name', 'address', 'city', 'state', 'zip', 'phone'));
+			$theaters->query->createFilterQuery('distance')->setQuery($queryHelper->geofilt('geocode', $latitude, $longitude, 25));
+			$theaters->query->addSort($queryHelper->geodist('geocode', $latitude, $longitude), 'asc');
+			$theaters->query->setRows(10);
+			if ($start > 0) {
+				$theaters->query->setStart($start);
+			}
+			$results = $theaters->search();
+
+			foreach ($results->getDocuments() as $document) {
+				$theater_id = $document->theater_id;
+				if (!empty($theater_id)) {
+					$theater = new Models\Theater($document, false);
+					$theater_list[trim(strtolower($document->name))] = $theater->getTheaterData();
+				}
+			}
+			$total_records = $results->getNumFound();
+		} catch (Exception $e) {
+			echo "<pre>";
+			print_r($e->getMessage());
+			echo "</pre>";die;
+		}
+
+		return array('search_results' => $theater_list, 'total_records' => $total_records);
+	}
+
+	public static function recentMoviesForLastXDays($past_days = 14, $future_days = 0) {
+		$recent_movies = array();
+		if (!is_numeric($past_days) || !is_numeric($future_days)) {
+			throw new Exception('Number of days in past or future is not valid.');
+		}
+
+		try {
+			$recent = new SearchController('movies');
+			$recent->query->setQuery('release_date:[NOW/DAY-' . $days . 'DAY TO NOW/DAY+' . $future_days . 'DAY]');
+			$recent->query->addSort('release_date', 'desc');
+			//$recent->query->setFields(array('movie_id', 'title', 'release_date'));
+			$recent->query->setRows(100);
+			$results = $recent->search();
+
+			foreach ($results as $document) {
+				$movie = new Models\Movie($document, false);
+				$recent_movies[$document->movie_id] = $movie->getMovieData();
+			}
+			/**
+			 * @todo Sort the list of movies into something useful.
+			 */
+		} catch (Exception $e) {
+			echo "<pre>";
+			print_r($e->getMessage());
+			echo "</pre>";die;
+		}
+
+		return $recent_movies;
+	}
+}

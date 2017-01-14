@@ -1,0 +1,149 @@
+<?php namespace StarTribune\Models;
+
+use StarTribune\Controllers\SearchController;
+use Exception;
+
+class Theater {
+	protected $theater_id;
+	protected $name;
+	protected $address;
+	protected $city;
+	protected $state;
+	protected $zip;
+	protected $phone;
+
+	protected $ticketing;
+	protected $screens;
+	protected $seating;
+	protected $price_adults;
+	protected $price_child;
+	protected $price_senior;
+
+	protected $theater_url;
+	protected $share_url;
+	protected $share_url_short;
+	protected $strib_area;
+	protected $geocode_0_coordinate; //latitude
+	protected $geocode_1_coordinate; //longitude
+	protected $geocode;
+
+	protected $tms_id;
+	protected $attributes;
+	protected $text;
+
+	protected $map_address;
+	protected $showtimes;
+
+	/**
+	 * Populate the model
+	 * 
+	 * @param object $theater Data about the theater
+	 */
+	public function __construct($theater, $populateShowtimes = true) {
+		try {
+			$this->populateModel($theater, $populateShowtimes);
+		} catch (Exception $e) {
+			echo "<pre>" . $e->getMessage() . "</pre>";
+		}
+	}
+
+	/**
+	 * Get the value of a data member and return it.
+	 *
+	 * @param string $name of the data member
+	 * @return mixed The value of the data member
+	 */
+	public function getAttribute($name) {
+		if (property_exists('\\StarTribune\\Models\\Theater', $name)) {
+			return $this->{$name};
+		} else {
+			return;
+		}
+	}
+
+	/**
+	 * Set a data member's value
+	 * @internal Since the data is saved in solr, and this application isn't currently used
+	 *   to actually update that information in any fashion, this function is strictly
+	 *   used to populate the values of the model.
+	 *
+	 * @param string $name The name of the data member receiving the value.
+	 * @param mixed $value The new value of the data member.
+	 */
+	protected function setAttribute($name, $value) {
+		if (property_exists('\\StarTribune\\Models\\Theater', $name)) {
+			try {
+				$this->{$name} = $value;
+			} catch (Exception $e) {
+				echo "<pre>" . $e->getMessage() . "</pre>";
+			}
+		}
+	}
+
+	protected function populateModel($theater, $populateShowtimes) {
+		if (is_numeric($theater)) {
+			$theaters = new SearchController('theaters');
+			$theaters->query->setQuery('theater_id:' . $theater);
+			$theaters->query->setRows(1);
+			$results = $theaters->search();
+
+			if ($results->getNumFound() <= 0) {
+				throw new Exception('Theater not found.');
+			}
+		} elseif (is_object($theater)) {
+			$results = array($theater);
+		} else {
+			throw new Exception('Invalid theater.');
+		}
+
+		foreach ($results as $document) {
+			foreach ($document as $key => $value) {
+				$this->setAttribute($key, $value);
+			}
+			break;
+		}
+		if (!empty($this->address) && !empty($this->zip)) {
+			$this->setAttribute('map_address', $this->address . ',' . $this->zip);
+		} elseif (!empty($this->address) && !empty($this->city) && !empty($this->state)) {
+			$this->setAttribute('map_address', $this->address . ',' . $this->city . ',' . $this->state);
+		}
+
+		//Normalize data
+        if (
+            !empty($this->theater_url) &&
+            ((stripos($this->theater_url, 'http:') === false || stripos($this->theater_url, 'http:') != 0) &&
+             (stripos($this->theater_url, 'https:') === false || stripos($this->theater_url, 'https:') != 0))
+        ) {
+            $this->theater_url = 'http://' . trim($this->theater_url);
+        }
+
+		if ($populateShowtimes) {
+			$this->populateShowtimes();
+		}
+	}
+
+	protected function populateShowtimes() {
+		if (empty($this->theater_id)) {
+			throw new Exception('Theater not populated.');
+		}
+		$showtime_list = array();
+		$showtimes = new SearchController('showtimes');
+		$showtimes->query->setRows(10000000);
+		$showtimes->query->setQuery('theater_id:' . $this->theater_id . ' AND show_date:[NOW/DAY TO NOW/DAY+14DAY]');
+		$results = $showtimes->search();
+
+		foreach ($results as $document) {
+			$showtime = new Showtime($document);
+			$time = $showtime->getShowtimeData();
+			if (!isset($showtime_list[$showtime->getAttribute('movie_id')])) {
+				$showtime_list[$showtime->getAttribute('movie_id')] = array('id' => $showtime->getAttribute('movie_id'), 'title' => $showtime->getAttribute('movie_title'), 'times' => array());
+			}
+			$showtime_list[$showtime->getAttribute('movie_id')]['times'][$showtime->getAttribute('showtime_id')] = $time;
+		}
+		$this->setAttribute('showtimes', $showtime_list);
+	}
+
+	public function getTheaterData() {
+		return get_object_vars($this);
+	}
+}

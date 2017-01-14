@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/repos/apps/!svn/ver/10565/trunk/htdocs/movies/app/StarTribune/TemplateEngines
+END
+Twig.php
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/StarTribune/TemplateEngines/Twig.php
+END
+TwigFunctions.php
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/repos/apps/!svn/ver/10565/trunk/htdocs/movies/app/StarTribune/TemplateEngines/TwigFunctions.php
+END

@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/StarTribune/Models
+END
+Theater.php
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/StarTribune/Models/Theater.php
+END
+Movie.php
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/StarTribune/Models/Movie.php
+END
+Showtime.php
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/StarTribune/Models/Showtime.php
+END

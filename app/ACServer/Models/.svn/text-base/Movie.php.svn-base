@@ -1,0 +1,143 @@
+<?php namespace StarTribune\Models;
+
+use StarTribune\Controllers\SearchController;
+use Exception;
+
+class Movie {
+	protected $movie_id;
+	protected $parent_id;
+
+	protected $title;
+	protected $summary;
+	protected $actors;
+	protected $directors;
+	protected $producers;
+	protected $distributor;
+	protected $genre;
+	protected $running_time; //minutes
+	protected $stars;
+
+	protected $release_date;
+	protected $release_notes;
+	protected $summary_100;
+	protected $summary_60;
+	protected $mpaa_rating;
+	protected $mpaa_rating_advisory;
+	protected $mpaa_rating_int;
+	protected $thumbnail;
+	protected $thumbnail_large;
+	protected $trailer_media_id;
+	protected $trailer_mobile_url;
+
+	protected $fandango_id;
+	protected $rt_critics_rating;
+	protected $rt_critics_score;
+	protected $rt_id;
+	protected $rt_mobile_url;
+	protected $share_url;
+	protected $share_url_short;
+
+	protected $strib_stars;
+	protected $strib_review;
+	protected $strib_review_thumbnail;
+	protected $strib_video_review_mobile_url;
+	protected $text;
+
+	protected $showtimes;
+
+	/**
+	 * Populate the model
+	 * 
+	 * @param object $movie Data about the movie
+	 */
+	public function __construct($movie, $populateShowtimes = true) {
+		try {
+			$this->populateModel($movie, $populateShowtimes);
+		} catch (Exception $e) {
+			echo "<pre>" . $e->getMessage() . "</pre>";
+		}
+	}
+
+	/**
+	 * Get the value of a data member and return it.
+	 *
+	 * @param string $name of the data member
+	 * @return mixed The value of the data member
+	 */
+	public function getAttribute($name) {
+		if (property_exists('\\StarTribune\\Models\\Movie', $name)) {
+			return $this->{$name};
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set a data member's value
+	 * @internal Since the data is saved in solr, and this application isn't currently used
+	 *   to actually update that information in any fashion, this function is strictly
+	 *   used to populate the values of the model.
+	 *
+	 * @param string $name The name of the data member receiving the value.
+	 * @param mixed $value The new value of the data member.
+	 */
+	protected function setAttribute($name, $value) {
+		if (property_exists('\\StarTribune\\Models\\Movie', $name)) {
+			try {
+				$this->{$name} = $value;
+			} catch (Exception $e) {
+				echo "<pre>" . $e->getMessage() . "</pre>";
+			}
+		}
+	}
+
+	protected function populateModel($movie, $populateShowtimes) {
+		if (is_numeric($movie)) {
+			$movies = new SearchController('movies');
+			$movies->query->setQuery('movie_id:' . $movie);
+			$movies->query->setRows(1);
+			$results = $movies->search();
+
+			if ($results->getNumFound() <= 0) {
+				throw new Exception('Movie not found.');
+			}
+		} elseif (is_object($movie)) {
+			$results = array($movie);
+		} else {
+			throw new Exception('Invalid movie');
+		}
+
+		foreach ($results as $document) {
+			foreach ($document as $key => $value) {
+				$this->setAttribute($key, $value);
+			}
+			break;
+		}
+
+		if ($populateShowtimes) {
+			$this->populateShowtimes();
+		}
+	}
+
+	protected function populateShowtimes() {
+		if (empty($this->movie_id)) {
+			throw new Exception('Movie not populated.');
+		}
+		$showtime_list = array();
+		$showtimes = new SearchController('showtimes');
+		$showtimes->query->setRows(10000000);
+		$showtimes->query->setQuery('movie_id:' . $this->movie_id . ' AND show_date:[NOW/DAY TO NOW/DAY+14DAY]');
+		$showtimes->query->addSort('theater_name', 'asc');
+		$results = $showtimes->search();
+
+		foreach ($results as $document) {
+			$showtime = new Showtime($document);
+			$showtime_list[$showtime->getAttribute('show_date')][$showtime->getAttribute('showtime_id')] = $showtime->getShowtimeData();
+		}
+		$this->setAttribute('showtimes', $showtime_list);
+	}
+
+	public function getMovieData() {
+		return get_object_vars($this);
+	}
+}

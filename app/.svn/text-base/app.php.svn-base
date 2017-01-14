@@ -1,0 +1,17 @@
+<?php
+
+if ( extension_loaded( 'newrelic' ) ) {
+    newrelic_set_appname( 'Movies' );
+}
+
+define( 'APP_DIRECTORY', __DIR__ . '/..' );
+
+require_once APP_DIRECTORY . '/vendor/autoload.php';
+
+use StarTribune\TemplateEngines\TwigFunctions;
+use StarTribune\TemplateEngines\Twig as View;
+use \Twig_Extension_Debug;
+
+$view = new View( '', array( 'debug' => true ) );
+$view->addExtension( new TwigFunctions() );
+$view->addExtension( new Twig_Extension_Debug() );

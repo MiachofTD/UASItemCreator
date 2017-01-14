@@ -1,0 +1,45 @@
+{% if search_results is not empty %}
+<div class="nav {{ class }}">
+	
+	{# set up variables for the paging strip #}
+
+	{% set numShown = 10 %}
+	{% set numPages = total_records // numShown %}
+	{% set remPages = total_records % numShown %}
+	{% if remPages > 0 %}
+		{% set numPages = numPages + 1 %}
+	{% endif %}
+	{% if numPages < 1 %}
+		{% set numPages = 1 %}
+	{% endif %}
+	{% set pageIndex = 1 %}
+
+	{# this block sets up the variable for showing where we are in the paging sequence #}
+
+	{% if start < numShown %}
+		{% set shownNum =  numShown %}
+		{% set startNum = 1 %}
+	{% else %}
+		{% set shownNum =  ( start - 1 ) + numShown %}
+		{% set startNum = start - 1 %}
+	{% endif %}
+		{% if shownNum > total_records %}
+		{% set shownNum = total_records %}
+		{% set startNum = start - 1 %}
+	{% endif %}
+
+	{# markup and logic for the paging strip #}
+	<div class="left">
+		{% for i in 1..numPages %}
+			{% if ( loop.index == loop.first ) and (pageIndex != start ) %} <a class="nextPrev" href="?zipcode={{ zipcode }}&amp;start={{ start - numShown }}">&laquo; Previous</a>{% endif %}
+
+			<a {% if pageIndex == start %}class="active" {% endif %}href="?zipcode={{ zipcode }}&amp;start={{ pageIndex }}">{{ loop.index }}</a>{% if loop.index != loop.last %} <span class="pipe">|</span> {% endif %} {% if ( loop.index == loop.last ) and  (pageIndex != start ) %} <a class="nextPrev" href="?zipcode={{ zipcode }}&amp;start={{ start + numShown }}">Next &raquo;</a>{% endif %}
+
+			{% if loop.index == loop.last %} 
+				</div><div class="right">Displaying {{ startNum }} - {{ shownNum }} of {{ total_records }} results
+			{% endif %}
+			{% set pageIndex = pageIndex + numShown %}
+		{% endfor %}
+	</div>
+</div>
+{% endif %}

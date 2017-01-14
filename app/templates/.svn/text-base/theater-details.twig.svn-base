@@ -1,0 +1,48 @@
+{{ getHeader(282483121, '/entertainment/movies') }}
+<style type="text/css">@import url("css/movie-guide.css");</style>
+{% include 'search-bar.twig' %}
+{# Dates forced GMT, because that's how they're saved in Solr. If you don't force the timezone, it displays in one of the American timezones, making it one day early #}
+<div class="movieGuide leftCol">
+	<a class="theater_map" id="map-canvas" target="_blank" href="https://www.google.com/maps/place/{{ theater.map_address|url_encode }}">
+		<img src="http://maps.googleapis.com/maps/api/staticmap?center={{ theater.map_address|url_encode }}&zoom=13&size=200x300&markers=color:blue%7C{{ theater.map_address|url_encode }}&sensor=false">
+	</a>
+	<p>{{ theater.address }},<br />{{ theater.city }}, {{ theater.state }} {{ theater.zip }}</p>
+	<p>{{ theater.phone|join(', ') }}</p>
+	<p><a href="https://www.google.com/maps/place/{{ theater.map_address|url_encode }}" target="_blank">Get Directions &raquo;</a></p>
+	{% if theater.theater_url %}<p><a href="{{ theater.theater_url }}" target="_blank">Visit the website &raquo;</a></p>{% endif %}
+</div>
+
+<div class="movieGuide rightCol">
+	<h3>{{ theater.name }}</h3>
+	<h4>Movies</h4>
+	<table class="time-list">
+		{% if showtimes is empty %}
+			<tr>
+				<td class="show-bar">No movies showing at this theater right now.</td>
+			</tr>
+		{% else %}
+		{% for movie in showtimes %}
+			{% set dayNum = loop.index %}
+			<tr{% if loop.last %} class="last"{% endif %}><td class="show-bar"><div {% if loop.first %}class="active" {% endif %}onclick="day{{ dayNum }}" id="day{{ dayNum }}"></div><a href="?movie={{ movie.id }}">{{ movie.title }}</a></td></tr>
+				{% for showtime in movie.times %}
+					<tr class="day day{{ dayNum }}{% if loop.last %} last{% endif %}"><td><p class="movieDay">{{ showtime.show_date|date('l, F j, Y', 'GMT') }}</p><p class="movieTime">{{ showtime.show_times_str }}</p></td></tr>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+		{% endif %}
+	</table>
+</div>
+
+<script type="text/javascript">
+	jQuery(document).ready(function() {
+	{% for movie in showtimes %}
+		{% set dayNum = loop.index %}
+		jQuery( "#day{{ dayNum }}" ).click(function() {
+			jQuery( ".day{{ dayNum }}" ).toggle(300);
+			jQuery(this).toggleClass( "active" );
+		});
+	{% endfor %}
+	});
+</script>
+
+{{ getFooter(282483121, '/entertainment/movies') }}

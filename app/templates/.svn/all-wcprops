@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/repos/apps/!svn/ver/9730/trunk/htdocs/movies/app/templates
+END
+search-results.twig
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/templates/search-results.twig
+END
+index.twig
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/templates/index.twig
+END
+search-bar.twig
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/repos/apps/!svn/ver/9730/trunk/htdocs/movies/app/templates/search-bar.twig
+END
+json.twig
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/templates/json.twig
+END
+search-pagination.twig
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/templates/search-pagination.twig
+END
+theater-details.twig
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/templates/theater-details.twig
+END
+xml.twig
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/templates/xml.twig
+END
+movie-details.twig
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/repos/apps/!svn/ver/9690/trunk/htdocs/movies/app/templates/movie-details.twig
+END

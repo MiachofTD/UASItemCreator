@@ -1,0 +1,41 @@
+<?php namespace StarTribune\Controllers;
+
+use Solarium;
+use StarTribune\Solr;
+
+class SearchController {
+	public $query;
+	/**
+	 * @var $search
+	 * Solarium Search Object
+	 */
+	protected $search;
+	protected $type;
+
+	public function __construct($type) {
+		switch (strtolower($type)) {
+			case 'movies':
+				$this->search = new Solr\Movies();
+				break;
+			case 'showtimes':
+				$this->search = new Solr\Showtimes();
+				break;
+			case 'theaters':
+				$this->search = new Solr\Theaters();
+				break;
+			case 'geolocations':
+				$this->search = new Solr\Geolocations();
+				break;
+
+			default;
+				throw new Exception('Invalid Search Type');
+				break;
+		}
+		$this->type = $type;
+		$this->query = &$this->search->query;
+	}
+
+	public function search() {
+		return $this->search->select();
+	}
+}

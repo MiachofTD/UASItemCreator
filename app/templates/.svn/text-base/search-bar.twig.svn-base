@@ -1,0 +1,40 @@
+<h2>Movie Guide</h2>
+<div class="navBar">
+	<div class="dropdown movie-drop">
+		<form action="details.php" method="GET">
+				<select name="movie" class="dropdown-select" onchange="this.form.submit()">
+				<option value="">Choose a movie</option>
+				{% for movie in movies %}
+				<option value="{{ movie.movie_id }}">{{ movie.title }}</option>
+				{% endfor %}
+				</select>
+		</form>
+	</div>
+	<div class="dropdown theater-drop">
+		<form action="details.php" method="GET">
+				<select name="theater" class="dropdown-select" onchange="this.form.submit()">
+					<option value="">Choose a theater</option>
+					{% for theater in theaters %}
+					<option value="{{ theater.theater_id }}">{{ theater.name }}</option>
+					{% endfor %}
+				</select>
+		</form>
+	</div>
+	<div class="dropdown zipForm">
+		<form action="search_results.php" method="GET">
+			<input type="text" name="zipcode" value="" placeholder="Enter a ZIP Code" save_placeholder="Enter a ZIP Code" /><input type="submit" />
+		</form>
+	</div>
+</div>
+
+<script type="text/javascript">
+    $('.zipForm form').submit(function(event) {
+        var zip = $( ".zipForm form input:first" ).val();
+
+        if (Math.floor(zip) == zip && $.isNumeric(zip)) {
+            return true;
+        }
+        alert('Please enter a valid 5 digit zipcode.');
+        return false;
+    });
+</script>
