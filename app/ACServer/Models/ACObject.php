@@ -54,12 +54,24 @@ abstract class ACObject
         return $database->connect()->query( $query )->get();
     }
 
+    /**
+     * @param $data
+     * @return bool
+     */
     abstract public function insert( $data );
 
+    /**
+     * @param $data
+     * @return bool
+     */
     abstract public function update( $data );
 
-    abstract public function delete();
-
+    /**
+     * Putting this anywhere else didn't seem to work, so putting it in here
+     * @param string $value
+     *
+     * @return string
+     */
     public function camel_case( $value )
     {
         $value = ucwords( str_replace( [ '-', '_' ], ' ', $value ) );
@@ -68,7 +80,7 @@ abstract class ACObject
     }
 
     /**
-     * Make sure all the fields are filled
+     * Make sure all the fields have a value before trying to save
      * @param $data
      *
      * @return bool

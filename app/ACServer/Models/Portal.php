@@ -12,41 +12,15 @@ use ACServer\includes\Database;
 
 class Portal extends ACObject
 {
-    protected static $table = 'gameobjects_portals2';
+    /**
+     * @var string
+     */
+    protected static $table = 'gameobjects_portals';
 
-    public $id;
-    public $guid;
-    public $ownerId;
-    public $name;
-    public $description;
-    public $color;
-    public $landblock;
-    public $positionX;
-    public $positionY;
-    public $positionZ;
-    public $orientationW;
-    public $orientationX;
-    public $orientationY;
-    public $orientationZ;
-    public $destLandblock;
-    public $destPositionX;
-    public $destPositionY;
-    public $destPositionZ;
-    public $destOrientationW;
-    public $destOrientationX;
-    public $destOrientationY;
-    public $destOrientationZ;
-    public $minLvl;
-    public $maxLvl;
-
-    protected $fields = [
-        'ID', 'GUID', 'OwnerID', 'Name', 'Description', 'color', 'min_lvl', 'max_lvl',
-        'Landblock', 'Position_X', 'Position_Y', 'Position_Z',
-        'Orientation_W', 'Orientation_X', 'Orientation_Y', 'Orientation_Z',
-        'Dest_Landblock', 'Dest_Position_X', 'Dest_Position_Y', 'Dest_Position_Z',
-        'Dest_Orientation_W', 'Dest_Orientation_X', 'Dest_Orientation_Y', 'Dest_Orientation_Z'
-    ];
-
+    /**
+     * Portal constructor.
+     * @param array $portal
+     */
     public function __construct( array $portal = [] )
     {
         $this->database = new Database();
@@ -87,7 +61,11 @@ class Portal extends ACObject
         return $this->database->query( $query, $bindings )->insert();
     }
 
-    public function addDestination( $portal )
+    /**
+     * @param $portal
+     * @return bool
+     */
+    public function update( $portal )
     {
         if ( !$this->validate( $portal ) ) {
             return false;
@@ -114,13 +92,6 @@ class Portal extends ACObject
 
         return $this->database->query( $query, $bindings )->update();
     }
-
-    public function update( $data )
-    {
-
-    }
-
-    public function delete() {}
 
     /**
      * @param $id

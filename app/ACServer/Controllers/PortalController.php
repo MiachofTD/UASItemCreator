@@ -14,7 +14,7 @@ use ACServer\Models\Portal;
 class PortalController
 {
     /**
-     * GET
+     * GET /portals/create.php
      * @param bool $error
      *
      * @return array
@@ -30,17 +30,7 @@ class PortalController
     }
 
     /**
-     * GET
-     * @param int $id
-     *
-     * @return array
-     */
-    public function edit( $id )
-    {
-        return [];
-    }
-
-    /**
+     * GET /portals/addDestination.php
      * @param bool $error
      *
      * @return array
@@ -58,19 +48,19 @@ class PortalController
     }
 
     /**
-     * GET
+     * POST /portals/addDestination.php
      * @param array $data
      *
-     * @return array
+     * @return bool
      */
-    public function addDestination( $data )
+    public function edit( $data )
     {
         $portal = new Portal( $data );
-        return $portal->addDestination( $data );
+        return $portal->update( $data );
     }
 
     /**
-     * POST
+     * POST /portals/create.php
      * @param array $data
      *
      * @return bool

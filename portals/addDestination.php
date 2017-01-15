@@ -15,7 +15,7 @@ $controller = new PortalController();
 $error = false;
 
 if ( isset( $_REQUEST[ 'AvatarGUID' ] ) ) {
-    $error = !$controller->addDestination( $_REQUEST );
+    $error = !$controller->edit( $_REQUEST );
 }
 
 $view->render( 'portals/addDestination.twig', $controller->destination( $error ) );
